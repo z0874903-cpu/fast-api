@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Chat</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container */
+.chat {
+    width: 500px;
+    height: 600px;
+    background: #1e293b;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Header */
+.header {
+    padding: 15px;
+    background: #020617;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    font-weight: bold;
+}
+
+/* Messages */
+.messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* Message bubbles */
+.msg {
+    max-width: 75%;
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    line-height: 1.4;
+}
+
+.user {
+    background: #2563eb;
+    color: white;
+    margin-left: auto;
+}
+
+.bot {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+/* Input area */
+.input-area {
+    display: flex;
+    padding: 10px;
+    background: #020617;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+}
+
+button {
+    margin-left: 10px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #22c55e;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Loader */
+.loader {
+    font-size: 12px;
+    opacity: 0.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat">
+    <div class="header">AI Assistant</div>
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+        <input id="input" placeholder="Type a message..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("input");
+    const messages = document.getElementById("messages");
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    // User message
+    messages.innerHTML += `<div class="msg user">${text}</div>`;
+    input.value = "";
+
+    // Loader
+    const loaderId = Date.now();
+    messages.innerHTML += `<div class="msg bot loader" id="${loaderId}">Typing...</div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/chat/test", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ message: text })
+        });
+
+        const data = await res.json();
+
+        // Replace loader with actual response
+        document.getElementById(loaderId).innerText = data.response;
+
+    } catch (err) {
+        document.getElementById(loaderId).innerText = "Error connecting to server";
+    }
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+// Enter key support
+function handleKey(e) {
+    if (e.key === "Enter") sendMessage();
+}
+</script>
+
+</body>
+</html>
