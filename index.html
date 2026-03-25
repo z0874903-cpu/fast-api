@@ -2,153 +2,513 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Chat Assistant</title>
 
 <style>
-body {
+* {
     margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: #0f172a;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 /* Container */
-.chat {
-    width: 500px;
-    height: 600px;
+.chat-container {
+    width: 100%;
+    max-width: 600px;
+    height: 80vh;
+    min-height: 500px;
     background: #1e293b;
-    border-radius: 12px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    overflow: hidden;
 }
 
 /* Header */
 .header {
-    padding: 15px;
-    background: #020617;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    font-weight: bold;
+    padding: 20px;
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    border-bottom: 1px solid #334155;
+    text-align: center;
 }
 
-/* Messages */
+.header h1 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.header p {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Messages Area */
 .messages {
     flex: 1;
-    padding: 15px;
+    padding: 20px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #0f172a;
 }
 
 /* Message bubbles */
-.msg {
-    max-width: 75%;
-    padding: 10px 14px;
-    margin: 8px 0;
-    border-radius: 12px;
-    line-height: 1.4;
+.message {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
 }
 
-.user {
-    background: #2563eb;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-message {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     color: white;
-    margin-left: auto;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
 }
 
-.bot {
+.bot-message {
     background: #334155;
     color: #e2e8f0;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
 }
 
-/* Input area */
+/* Message metadata */
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    background: #334155;
+    color: #e2e8f0;
+    align-self: flex-start;
+    padding: 12px 16px;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: typingAnimation 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingAnimation {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Input Area */
 .input-area {
     display: flex;
-    padding: 10px;
+    padding: 20px;
     background: #020617;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-top: 1px solid #334155;
+    gap: 10px;
+}
+
+.input-wrapper {
+    flex: 1;
+    position: relative;
 }
 
 input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 25px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    font-size: 1rem;
     outline: none;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+input::placeholder {
+    color: #64748b;
 }
 
 button {
-    margin-left: 10px;
-    padding: 10px 16px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 8px;
-    background: #22c55e;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
     cursor: pointer;
     font-weight: bold;
+    transition: all 0.3s ease;
 }
 
-/* Loader */
-.loader {
-    font-size: 12px;
-    opacity: 0.7;
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Scrollbar styling */
+.messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.messages::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Error message */
+.error-message {
+    background: #dc2626;
+    color: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .chat-container {
+        height: 90vh;
+        border-radius: 12px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .input-area {
+        padding: 15px;
+    }
+    
+    button {
+        padding: 10px 20px;
+    }
+}
+
+/* Welcome message styling */
+.welcome-message {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+    font-size: 0.9rem;
 }
 </style>
 </head>
 
 <body>
 
-<div class="chat">
-    <div class="header">AI Assistant</div>
-    <div class="messages" id="messages"></div>
+<div class="chat-container">
+    <div class="header">
+        <h1>
+            <span class="status"></span>
+            AI Assistant
+        </h1>
+        <p>Powered by GPT-4 | Ask me anything!</p>
+    </div>
+    
+    <div class="messages" id="messages">
+        <div class="welcome-message">
+            👋 Welcome! Ask me anything and I'll help you out.
+        </div>
+    </div>
 
     <div class="input-area">
-        <input id="input" placeholder="Type a message..." onkeypress="handleKey(event)">
-        <button onclick="sendMessage()">Send</button>
+        <div class="input-wrapper">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Type your message here..." 
+                onkeypress="handleKeyPress(event)"
+                autocomplete="off"
+            >
+        </div>
+        <button onclick="sendMessage()" id="sendButton">
+            Send ✨
+        </button>
     </div>
 </div>
 
 <script>
+// Configuration - uses relative URLs, works on any domain/port
+const API_URL = '';  // Empty means use same origin
+
+// Get DOM elements
+const messagesContainer = document.getElementById('messages');
+const messageInput = document.getElementById('messageInput');
+const sendButton = document.getElementById('sendButton');
+
+// Remove welcome message when first message is sent
+let welcomeRemoved = false;
+
+// Send message function
 async function sendMessage() {
-    const input = document.getElementById("input");
-    const messages = document.getElementById("messages");
-
-    const text = input.value.trim();
-    if (!text) return;
-
-    // User message
-    messages.innerHTML += `<div class="msg user">${text}</div>`;
-    input.value = "";
-
-    // Loader
-    const loaderId = Date.now();
-    messages.innerHTML += `<div class="msg bot loader" id="${loaderId}">Typing...</div>`;
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-        const res = await fetch("http://127.0.0.1:8000/chat/test", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ message: text })
-        });
-
-        const data = await res.json();
-
-        // Replace loader with actual response
-        document.getElementById(loaderId).innerText = data.response;
-
-    } catch (err) {
-        document.getElementById(loaderId).innerText = "Error connecting to server";
+    const message = messageInput.value.trim();
+    
+    if (!message) {
+        return;
     }
-
-    messages.scrollTop = messages.scrollHeight;
+    
+    // Remove welcome message if it's still there
+    if (!welcomeRemoved) {
+        const welcomeMsg = document.querySelector('.welcome-message');
+        if (welcomeMsg) {
+            welcomeMsg.remove();
+            welcomeRemoved = true;
+        }
+    }
+    
+    // Disable input while sending
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+    
+    // Add user message to chat
+    addMessage(message, 'user');
+    
+    // Clear input
+    messageInput.value = '';
+    
+    // Show typing indicator
+    const typingIndicatorId = showTypingIndicator();
+    
+    try {
+        // Send request to backend
+        const response = await fetch(`${API_URL}/chat/test`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message }),
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Remove typing indicator
+        removeTypingIndicator(typingIndicatorId);
+        
+        // Add bot response to chat
+        addMessage(data.response, 'bot');
+        
+    } catch (error) {
+        console.error('Error:', error);
+        
+        // Remove typing indicator
+        removeTypingIndicator(typingIndicatorId);
+        
+        // Show error message
+        addMessage('Sorry, I encountered an error. Please make sure the backend server is running and try again.', 'error');
+    } finally {
+        // Re-enable input
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        messageInput.focus();
+    }
 }
 
-// Enter key support
-function handleKey(e) {
-    if (e.key === "Enter") sendMessage();
+// Function to add a message to the chat
+function addMessage(content, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type === 'user' ? 'user-message' : type === 'error' ? 'error-message' : 'bot-message'}`;
+    
+    // Format message content (preserve line breaks)
+    const formattedContent = content.replace(/\n/g, '<br>');
+    messageDiv.innerHTML = `
+        ${formattedContent}
+        <span class="message-time">${getCurrentTime()}</span>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom();
 }
+
+// Function to show typing indicator
+function showTypingIndicator() {
+    const indicatorId = 'typing-' + Date.now();
+    const indicatorDiv = document.createElement('div');
+    indicatorDiv.className = 'typing-indicator';
+    indicatorDiv.id = indicatorId;
+    indicatorDiv.innerHTML = `
+        <span>AI is thinking</span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+    `;
+    
+    messagesContainer.appendChild(indicatorDiv);
+    scrollToBottom();
+    
+    return indicatorId;
+}
+
+// Function to remove typing indicator
+function removeTypingIndicator(indicatorId) {
+    const indicator = document.getElementById(indicatorId);
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+// Helper function to get current time
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Helper function to scroll to bottom
+function scrollToBottom() {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Handle Enter key press
+function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        if (!messageInput.disabled && messageInput.value.trim()) {
+            sendMessage();
+        }
+    }
+}
+
+// Auto-focus input on page load
+window.addEventListener('load', () => {
+    messageInput.focus();
+});
+
+// Optional: Add keyboard shortcut (Ctrl+Enter for new line, Enter for send)
+messageInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+        // Allow shift+enter for new line
+        return;
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!messageInput.disabled && messageInput.value.trim()) {
+            sendMessage();
+        }
+    }
+});
+
+// Optional: Check if backend is available on load
+async function checkBackendStatus() {
+    try {
+        const response = await fetch(`${API_URL}/`);
+        if (response.ok) {
+            console.log('Backend server is running');
+        } else {
+            console.warn('Backend server returned non-OK status');
+        }
+    } catch (error) {
+        console.warn('Backend server may not be running:', error.message);
+        // Show a subtle warning but don't block the UI
+        setTimeout(() => {
+            if (!welcomeRemoved) {
+                const welcomeMsg = document.querySelector('.welcome-message');
+                if (welcomeMsg) {
+                    welcomeMsg.innerHTML = `
+                        ⚠️ Backend server not detected. Please make sure the server is running at / (same origin).<br>
+                        👋 Welcome! Ask me anything and I'll help you out.
+                    `;
+                    welcomeMsg.style.background = '#f59e0b';
+                    welcomeMsg.style.color = '#000';
+                    welcomeMsg.style.padding = '20px';
+                    welcomeMsg.style.borderRadius = '12px';
+                }
+            }
+        }, 1000);
+    }
+}
+
+// Check backend status on load
+checkBackendStatus();
 </script>
 
 </body>
